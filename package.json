@@ -17,6 +17,9 @@
     "url": "https://github.com/soyundev/syn-core/issues"
   },
   "homepage": "https://github.com/soyundev/syn-core#readme",
+  "dependencies": {
+    "pubsub": "https://github.com/azer/pubsub"
+  },
   "devDependencies": {
     "dev-tools": "git://github.com/soyundev/dev-tools.git",
     "gulp": "3.9.1"
