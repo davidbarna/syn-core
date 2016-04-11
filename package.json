@@ -4,7 +4,8 @@
   "description": "Base libs for syn modules: events, dom builders, helpers, translations...",
   "main": "dest/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "gulp test",
+    "install": "node_modules/.bin/gulp"
   },
   "repository": {
     "type": "git",
@@ -15,5 +16,9 @@
   "bugs": {
     "url": "https://github.com/soyundev/syn-core/issues"
   },
-  "homepage": "https://github.com/soyundev/syn-core#readme"
+  "homepage": "https://github.com/soyundev/syn-core#readme",
+  "devDependencies": {
+    "dev-tools": "git://github.com/soyundev/dev-tools.git",
+    "gulp": "3.9.1"
+  }
 }
