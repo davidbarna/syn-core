@@ -1,0 +1,27 @@
+{
+  "name": "syn-core",
+  "version": "1.0.0",
+  "description": "Base libs for syn modules: events, dom builders, helpers, translations...",
+  "main": "dest/index.js",
+  "scripts": {
+    "test": "gulp test",
+    "install": "node_modules/.bin/gulp"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/soyundev/syn-core.git"
+  },
+  "author": "David Almeida <davidbarna@gmail.com>",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/soyundev/syn-core/issues"
+  },
+  "homepage": "https://github.com/soyundev/syn-core#readme",
+  "dependencies": {
+    "pubsub": "https://github.com/azer/pubsub"
+  },
+  "devDependencies": {
+    "dev-tools": "git://github.com/soyundev/dev-tools.git",
+    "gulp": "3.9.1"
+  }
+}
