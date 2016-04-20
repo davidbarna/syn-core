@@ -1,6 +1,6 @@
 {
   "name": "syn-core",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Base libs for syn modules: events, dom builders, helpers, translations...",
   "main": "dist/index.js",
   "scripts": {
