@@ -1,6 +1,6 @@
 describe 'syn-core.pubsub.channel.factory', ->
 
-  core = require( 'src/index.bundle')
+  core = require( 'src/index')
   factory = core.pubsub.channel.factory
   Channel = core.pubsub.Channel
 

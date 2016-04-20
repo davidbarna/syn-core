@@ -1,6 +1,6 @@
 describe 'syn-core.pubsub.Channel', ->
 
-  core = require( 'src/index.bundle' )
+  core = require( 'src/index' )
   Channel = core.pubsub.Channel
 
   beforeEach ->
