@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/soyundev/syn-core#readme",
   "dependencies": {
-    "pubsub": "2.1.7"
+    "pubsub": "https://github.com/azer/pubsub"
   },
   "devDependencies": {
     "gulp": "3.9.1",
