@@ -47,6 +47,7 @@ fdescribe 'i18n', ->
     fooInstance.translations( 'es', textsES )
 
     @sandbox = sinon.sandbox.create()
+    @sandbox.stub( console, 'warn' )
 
   afterEach  ->
     core.i18n.removeAll()

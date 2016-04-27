@@ -58,6 +58,7 @@ class I18N {
    */
   translations (lang, translations) {
     if (!this._isValidLanguage(lang) || !this._areValidTexts(translations)) {
+      console.warn('i18n.translations: Invalid language or translations.')
       return false
     }
 
@@ -77,6 +78,7 @@ class I18N {
    */
   setLanguage (lang) {
     if (!this._isValidLanguage(lang)) {
+      console.warn('i18n.setLanguage: Invalid language.')
       return false
     }
     language = lang
@@ -188,9 +190,7 @@ export var i18n = {
    * @param {string} lang
    * @returns {boolean}
    */
-  setLanguage: function () {
-    return I18N.prototype.setLanguage.apply(I18N.prototype, arguments)
-  },
+  setLanguage: I18N.prototype.setLanguage.bind(I18N.prototype),
 
   /**
    * Removes an instance from the collection.
