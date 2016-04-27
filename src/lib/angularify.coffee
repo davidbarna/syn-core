@@ -28,7 +28,7 @@ angularify = ( scope, ctrl ) ->
   ###
   ctrl.render = ( data ) ->
     scope[key] = value for key, value of data
-    scope.$digest() if !scope.$$phase
+    scope.$digest() if !scope.$$phase && !scope.$root.$$phase
     return
 
   # On scope destroy, ctrl.destroy must be called if exists
