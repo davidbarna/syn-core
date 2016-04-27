@@ -35,6 +35,15 @@ class Config
     return this
 
   ###
+   * Merges current config with given source
+   * @param  {Config} source Must be a Config instance
+   * @return {Config} this
+  ###
+  merge: (source) ->
+    _.merge(this, source.toObject())
+    return this
+
+  ###
    * Clears all defined properties
    * @return {this}
   ###

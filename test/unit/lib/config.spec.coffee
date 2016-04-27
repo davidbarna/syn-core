@@ -98,6 +98,25 @@ describe 'Config', ->
         it 'should throw an error', ->
           ( => @instance.set( @config ) ).should.throw
 
+  describe '#merge', ->
+
+    beforeEach ->
+      params = {
+        production:
+          node1:
+            node1prop2: 'overwrittenValue'
+            node1prop3: 'newValue'
+      }
+      newConfig = new Config()
+      newConfig.set( params, 'production' )
+      @instance.set( @config, 'production' )
+      @instance.merge(newConfig)
+
+    it 'should merge properties from given config', ->
+      @instance.node1.node1prop1.should.equal 'node1prop1'
+      @instance.node1.node1prop2.should.equal 'overwrittenValue'
+      @instance.node1.node1prop3.should.equal 'newValue'
+
   describe '#clear', ->
 
     beforeEach ->
