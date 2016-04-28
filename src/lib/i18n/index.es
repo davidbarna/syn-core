@@ -35,19 +35,22 @@ class I18N {
    * @param {string} id Instance ID. Optional.
    */
   constructor (id) {
-    let isValidId = typeof id === 'string'
-
-    if (!!isValidId && !!instances[id]) {
-      return instances[id]
-    } else if (!!isValidId && !instances[id]) {
-      instances[id] = this
-    }
 
     /**
      * Object where the translations are stored.
      * @type {Object}
      */
     this._translations = {}
+
+    if (typeof id !== 'string') {
+      return this
+    }
+
+    if (!instances[id]) {
+      instances[id] = this
+    }
+
+    return instances[id]
   }
 
   /**
@@ -57,8 +60,13 @@ class I18N {
    * @returns {boolean} true if all went ok. false if not.
    */
   translations (lang, translations) {
-    if (!this._isValidLanguage(lang) || !this._areValidTexts(translations)) {
-      console.warn('i18n.translations: Invalid language or translations.')
+    if (!this._isValidLanguage(lang)) {
+      console.warn('i18n.translations: Invalid language.')
+      return false
+    }
+
+    if (!this._areValidTexts(translations)) {
+      console.warn('i18n.translations: Invalid translations.')
       return false
     }
 
@@ -147,11 +155,11 @@ class I18N {
    * @returns {string}
    */
   _getTranslation (msgid) {
-    if (this._languageExists(language) && typeof this._translations[language][msgid] !== 'undefined') {
+    if (this._languageExists(language) && !!this._translations[language][msgid]) {
       return this._translations[language][msgid]
     }
 
-    if (this._languageExists(DEFAULT_LANGUAGE) && typeof this._translations[DEFAULT_LANGUAGE][msgid] !== 'undefined') {
+    if (this._languageExists(DEFAULT_LANGUAGE) && !!this._translations[DEFAULT_LANGUAGE][msgid]) {
       return this._translations[DEFAULT_LANGUAGE][msgid]
     }
 
@@ -165,9 +173,15 @@ class I18N {
    * @returns {string}
    */
   _replaceParams (text, params) {
-    return text.replace(paramsPattern, function (v, n) {
-      return (n >= 1 && n <= params.length) ? params[n - 1] : v
-    })
+    /**
+     * Processes pattern matches.
+     * @param {string} match Matched substring
+     * @param {string} p The position of the parenthesized submatch string
+     */
+    let callback = function (match, p) {
+      return (p >= 1 && p <= params.length) ? params[p - 1] : match
+    }
+    return text.replace(paramsPattern, callback)
   }
 }
 
@@ -177,7 +191,7 @@ class I18N {
  */
 export var i18n = {
   /**
-   * Returns an existant instance or creates a new one.
+   * Returns an existent instance or creates a new one.
    * @param {string} id
    * @returns {I18N}
    */
