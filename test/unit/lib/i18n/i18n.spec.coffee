@@ -1,4 +1,4 @@
-fdescribe 'i18n', ->
+describe 'i18n', ->
 
   core = require( 'src/index' )
   instance = fooInstance = testInstance = null
