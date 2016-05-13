@@ -35,7 +35,6 @@ class I18N {
    * @param {string} id Instance ID. Optional.
    */
   constructor (id) {
-
     /**
      * Object where the translations are stored.
      * @type {Object}
