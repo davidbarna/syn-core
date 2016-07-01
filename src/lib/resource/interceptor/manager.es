@@ -52,7 +52,10 @@ import pubsub from '../../../lib/pubsub/channel-factory'
 import {Promise} from 'bluebird'
 import {_} from 'underscore'
 
-export class InterceptorManager {
+export const ADD_CHANNEL = 'interceptors:add'
+export const RESPONSE_METHOD = 'response'
+
+export class InterceptorHandler {
 
   constructor () {
     if (this.instance) {
@@ -69,16 +72,17 @@ export class InterceptorManager {
    * the passed method.
    * @param {string} method
    * @param {*} data
+   * @param {Object} options
    * @returns {Promise}
    */
-  process (method, data) {
+  process (method, data, options) {
     let promises = []
 
     this._iterateInterceptors((interceptor) => {
       if (interceptor[method]) {
         // Creates one promise per each interceptor.
         let promise = new Promise((resolve, reject) => {
-          interceptor[method](data, resolve, reject)
+          interceptor[method](data, resolve, reject, options)
         })
         promises.push(promise)
       }
@@ -141,8 +145,11 @@ export class InterceptorManager {
     }
   }
 
+  /**
+   * Event based interface to add a new interceptor
+  **/
   _listenOnAddEvent () {
-    this.pubsub = pubsub.create('interceptors', ['add'])
+    this.pubsub = pubsub.create(ADD_CHANNEL, ['add'])
     this.pubsub.add.subscribe((interceptor) => this.add(interceptor))
   }
 }

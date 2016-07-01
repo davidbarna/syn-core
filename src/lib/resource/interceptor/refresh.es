@@ -2,8 +2,13 @@
  * Client request/response interceptor
 **/
 import pubsub from '../../../lib/pubsub/channel-factory'
+import {
+  ADD_CHANNEL as INTERCEPTOR_ADD,
+  RESPONSE_METHOD as INTERCEPTOR_RESPONSE
+} from './manager'
+
 const MAX_ATTEMPTS = 2
-const REFRESH_URL = 'http://dev-api.grupoareas.com/stocks/v1.0/refresh'
+const HTTP_SESSION_EXPIRED_CODE = 419
 
 let tokenRefresherSingletonInstance = null
 
@@ -11,44 +16,57 @@ let tokenRefresherSingletonInstance = null
  * Adds the necessary interceptor for 419 response codes.
  * Will try to refresh the token and retries the last request
  * if it's successfully refreshed
+ * @param {Object} opts Configurable params
+ * @param {?code} opts.status Http status code to be intercepted
  * @return {Promise}
 **/
-export function enable () {
-  var tokenRefresher = new TokenRefresher()
+export function enable (opts = {}) {
+  var tokenRefresher = new TokenRefresher(opts)
   if (tokenRefresher.isEnabled()) {
     return
   }
   tokenRefresher.enable()
-  let eventPublisher = pubsub.create('interceptors', ['add'])
-  eventPublisher.add.publish({
-    'response': function (req, resolve, reject) {
-      // Response code is 419: Session expired.
-      if (req.target && req.target.status === 419) {
-        tokenRefresher.onSessionExpired(req, resolve, reject)
-      } else {
-        tokenRefresher.resetAttempts()
-        return resolve(req)
-      }
+  let interceptedStatus = opts.code || HTTP_SESSION_EXPIRED_CODE
+  let eventPublisher = pubsub.create(INTERCEPTOR_ADD, ['add'])
+  let interceptor = {}
+  interceptor[INTERCEPTOR_RESPONSE] = function (req, resolve, reject, options) {
+    // Session expired.
+    if (req.status === interceptedStatus) {
+      tokenRefresher.onSessionExpired(req, resolve, reject, options)
+    } else {
+      tokenRefresher.resetAttempts()
+      return resolve(req)
     }
-  })
+  }
+
+  eventPublisher.add.publish(interceptor)
 }
 
 class TokenRefresher {
 
   /**
-   * @return {Promise}
+   * @param {Object} opts Options
+   * @param {Function} opts.refreshRequestFn Request function to refresh the token
+   * @param {?Function} opts.retryRequestFn Function to retry last failed request
+   * the interceptor
   **/
-  constructor () {
+  constructor (opts) {
+    this.resetAttempts()
     if (tokenRefresherSingletonInstance) {
       return tokenRefresherSingletonInstance
     }
 
-    this.resetAttempts()
-    this._addEventsListeners()
+    if (!opts.refreshRequestFn) {
+      return console.error('TokenRefresher@constructor: No refreshRequest function set')
+    }
 
-    this.xhrCache = new window.syn.core.resource.XHRCache()
-      .enable()
+    this.refreshTokenRequest = opts.refreshRequestFn
+    this.retryRequest = opts.retryRequestFn
     tokenRefresherSingletonInstance = this
+  }
+
+  _clearSession () {
+    window.syn.auth.session.global.clear()
   }
 
   /**
@@ -56,26 +74,8 @@ class TokenRefresher {
    * @returns {boolean}
   **/
   isRememberActive () {
-    return !!this.session && !!this.session.user() && this.session.user().remember()
-  }
-
-  /**
-   * Listen to session changes
-  **/
-  _addEventsListeners () {
-    let gSession = window.syn.auth.session.global
-    gSession.on(gSession.CHANGE, (session) => {
-      console.log('New session', session)
-      this.session = session
-    })
-  }
-
-  /**
-   * Deep deleting the session object
-  **/
-  _clearSession () {
-    let gSession = window.syn.auth.session.global
-    gSession.clear()
+    let gSession = window.syn.auth.session.global.get()
+    return !!gSession && gSession.user() && gSession.user().remember()
   }
 
   resetAttempts () {
@@ -86,16 +86,19 @@ class TokenRefresher {
     this._enabled = true
   }
 
+  /**
+   * @returns {boolean}
+  **/
   isEnabled () {
     return this._enabled
   }
 
   /**
+   * Saves the new token data into the current session
    * @param {Object} opts Options
    * @param {string} opts.token
    * @param {string} opts.refresh_token
    * @param {number} opts.expires_in
-   * @returns {PersistentSession}
   **/
   updateToken (opts = {}) {
     if (!this.session) return
@@ -105,50 +108,49 @@ class TokenRefresher {
   }
 
   /**
-   * Does the API call which will refresh the token
-   * @returns {Promise}
+   * Client API Callback for request retry
+   * @param {Object} options
+   * @return {Promise}
   **/
-  refreshTokenRequest () {
-    let refreshReq = new window.syn.auth.resource.Client(REFRESH_URL)
-    let refreshToken = this.session.refreshToken()
-    let opts = {
-      headers: {
-        'token': refreshToken
-      },
-      noXHRCache: true
+  retry (response) {
+    if (!this.retryRequest) { return }
+    if (!response.token) {
+      this._clearSession()
+      throw new Error('TokenRefresher: Error retrieving the new token')
     }
-
-    return refreshReq.post(opts)
+    this.updateToken(response.token)
+    return this.retryRequest()
   }
 
   /**
-   * Does a XMLHttpRequest based on the data passed as param
-   * @param {Object} data
-   * @return {Promise}
+   * Called once the session is expired.
+   * Refreshes the token and retries last request.
+   * Retries N times, session is cleared when N retries are done
+   * but failed.
+   * IMPORTANT: This function must always resolve or reject
+   * @param {Object} req Request object
+   * @param {Function} resolve Callback to resolve the promise
+   * generated by the interceptor manager
+   * @param {Function} reject Callback to reject the promise
+   * generated by the interceptor manager
+   * @returns {Object|Promise}
   **/
-  retryRequest (data) {
-    if (!data) {
-      return
-    }
-    let retryReq = new window.syn.auth.resource.Client(data.url)
-    return retryReq.request(data.method, data.options)
-  }
-
   onSessionExpired (req, resolve, reject) {
     this.attempts++
     if (this.attempts === MAX_ATTEMPTS) {
       this._clearSession()
-    } else if (this.isRememberActive()) {
-      let self = this
-      let lastXhrData = this.xhrCache.getData()
+      reject(new Error('TokenRefresher: Max. nr. of retries reached'))
+    } else if (!this.isRememberActive()) {
       this.refreshTokenRequest()
-      .then(function (refreshResponse) {
-        self.updateToken(refreshResponse.token)
-        return self.retryRequest(lastXhrData)
+      .then((refreshResponse) => {
+        return this.retry(refreshResponse)
       })
       .catch(function (error) {
         reject(error)
       })
+    } else {
+      // Nothing has to be done
+      resolve(req)
     }
   }
 }
