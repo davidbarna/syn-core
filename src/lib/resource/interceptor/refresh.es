@@ -73,9 +73,9 @@ class TokenRefresher {
    * Returns true if the user has checked the login's remember me checkbox
    * @returns {boolean}
   **/
-  isRememberActive () {
+  isStayLoggedInChecked () {
     let gSession = window.syn.auth.session.global.get()
-    return !!gSession && gSession.user() && gSession.user().remember()
+    return !!gSession && gSession.stayLoggedIn()
   }
 
   resetAttempts () {
@@ -140,7 +140,7 @@ class TokenRefresher {
     if (this.attempts === MAX_ATTEMPTS) {
       this._clearSession()
       reject(new Error('TokenRefresher: Max. nr. of retries reached'))
-    } else if (!this.isRememberActive()) {
+    } else if (this.isStayLoggedInChecked()) {
       this.refreshTokenRequest()
       .then((refreshResponse) => {
         return this.retry(refreshResponse)

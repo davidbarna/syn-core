@@ -67,6 +67,8 @@ export class InterceptorHandler {
     this._listenOnAddEvent()
   }
 
+  static get RESPONSE_METHOD () { return RESPONSE_METHOD }
+
   /**
    * Calls all the interceptors that are listening to
    * the passed method.
