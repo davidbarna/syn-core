@@ -4,6 +4,12 @@ synCore =
     Channel: require( './lib/pubsub/channel' )
     channel:
       factory: require( './lib/pubsub/channel-factory' )
+  resource:
+    Client: require( './lib/resource/client' )
+    Url: require( './lib/resource/url' )
+    interceptors:
+      Handler: require( './lib/resource/interceptor/manager' ).InterceptorHandler
+      TokenRefresher: require( './lib/resource/interceptor/refresh' )
   angularify: require( './lib/angularify' )
   i18n: require( './lib/i18n' ).i18n
 
