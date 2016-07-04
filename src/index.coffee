@@ -8,7 +8,7 @@ synCore =
     Client: require( './lib/resource/client' )
     Url: require( './lib/resource/url' )
     interceptors:
-      Handler: require( './lib/resource/interceptor/manager' ).InterceptorHandler
+      Handler: require( './lib/resource/interceptor/handler' ).InterceptorHandler
       TokenRefresher: require( './lib/resource/interceptor/refresh' )
   angularify: require( './lib/angularify' )
   i18n: require( './lib/i18n' ).i18n
