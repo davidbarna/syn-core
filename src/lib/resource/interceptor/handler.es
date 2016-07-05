@@ -132,7 +132,7 @@ export class InterceptorHandler {
    */
   add (interceptor) {
     if (typeof interceptor !== 'object') {
-      this._error('add', 'Invalid interceptor, an object was expected.', 'warn')
+      this._error('add', 'Invalid interceptor, an object was expected.')
       return
     }
 
