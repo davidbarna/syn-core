@@ -91,10 +91,14 @@ export class TokenRefresher {
    * @param {string} opts.token
    * @param {string} opts.refresh_token
    * @param {number} opts.expires_in
+   * @param {Function} reject
+   * @returns {?Error}
   **/
-  updateToken (opts = {}) {
+  updateToken (opts = {}, reject) {
     if (!opts.token) {
-      throw new Error('TokenRefresher: Error retrieving the new token')
+      this._clear()
+      reject( new Error('TokenRefresher: Error retrieving the new token') )
+      return
     }
 
     let gSession = window.syn.auth.session.global.get()
@@ -150,7 +154,7 @@ export class TokenRefresher {
 
     return this.refreshTokenRequest()
       .then((refreshResponse) => {
-        this.updateToken(refreshResponse)
+        this.updateToken(refreshResponse, reject)
         return this.retry(retryData)
       })
       .then(function (result) {

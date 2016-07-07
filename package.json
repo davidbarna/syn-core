@@ -22,7 +22,8 @@
   "homepage": "https://github.com/soyundev/syn-core#readme",
   "dependencies": {
     "lodash": "4.5.0",
-    "pubsub": "https://github.com/azer/pubsub"
+    "pubsub": "https://github.com/azer/pubsub",
+    "bluebird": "3.3.3"
   },
   "devDependencies": {
     "syn-dev-tools": "~0"

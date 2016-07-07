@@ -1,6 +1,8 @@
 describe 'interceptor.refresh.enable', ->
-  enableTokenRefresher = require( 'src/lib/resource/interceptor/refresh' ).enable
-  TokenRefresher = require( 'src/lib/resource/interceptor/refresh' ).TokenRefresher
+  enableTokenRefresher = require( 'src/lib/resource/interceptor/token-refresher' )
+    .enable
+  TokenRefresher = require( 'src/lib/resource/interceptor/token-refresher' )
+    .TokenRefresher
   pubsub = require( 'src/lib/pubsub/channel-factory' )
 
   ADD_CHANNEL = 'interceptors:add'
@@ -32,7 +34,8 @@ describe 'interceptor.refresh.enable', ->
     TokenRefresher::enable.should.have.been.calleOnce
 
 describe 'interceptor.refresh.TokenRefresher', ->
-  TokenRefresher = require( 'src/lib/resource/interceptor/refresh' ).TokenRefresher
+  TokenRefresher = require( 'src/lib/resource/interceptor/token-refresher' )
+    .TokenRefresher
   pubsub = require( 'src/lib/pubsub/channel-factory' )
   core = require( 'src/index.bundle' )
   Promise = require( 'bluebird' )
@@ -289,6 +292,9 @@ describe 'interceptor.refresh.TokenRefresher', ->
       it 'should reject the interceptor', ( done ) ->
         @promise.then =>
           @reject.should.have.been.calledOnce
+          @reject.should.be.calledWithExactly(
+            new Error( 'TokenRefresher: Error retrieving the new token' )
+          )
           done()
           return true
         .catch ( e ) -> console.error( e.message )
