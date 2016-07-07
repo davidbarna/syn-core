@@ -10,8 +10,6 @@ import {
 const MAX_ATTEMPTS = 2
 const HTTP_SESSION_EXPIRED_CODE = 419
 
-let tokenRefresherSingletonInstance = null
-
 /**
  * Adds the necessary interceptor for 419 response codes.
  * Will try to refresh the token and retries the last request
@@ -26,25 +24,16 @@ export function enable (opts = {}) {
     return
   }
 
-  let interceptedStatus = opts.code || HTTP_SESSION_EXPIRED_CODE
   let eventPublisher = pubsub.create(INTERCEPTOR_ADD, ['add'])
   let interceptor = {}
 
   tokenRefresher.enable()
 
-  interceptor[INTERCEPTOR_RESPONSE] = function (req, resolve, reject, options) {
-    // Session expired.
-    if (req.status === interceptedStatus) {
-      return tokenRefresher.onSessionExpired(req, resolve, reject, options)
-    } else {
-      tokenRefresher.resetAttempts()
-      return resolve(req)
-    }
-  }
+  interceptor[INTERCEPTOR_RESPONSE] = tokenRefresher.interceptor.bind(tokenRefresher)
   eventPublisher.add.publish(interceptor)
 }
 
-class TokenRefresher {
+export class TokenRefresher {
 
   /**
    * @param {Object} opts Options
@@ -54,8 +43,8 @@ class TokenRefresher {
   **/
   constructor (opts) {
     this.resetAttempts()
-    if (tokenRefresherSingletonInstance) {
-      return tokenRefresherSingletonInstance
+    if (this.tokenRefresherSingletonInstance) {
+      return this.tokenRefresherSingletonInstance
     }
 
     if (!opts.refreshRequestFn) {
@@ -64,7 +53,7 @@ class TokenRefresher {
 
     this.refreshTokenRequest = opts.refreshRequestFn
     this.retryRequest = opts.retryRequestFn
-    tokenRefresherSingletonInstance = this
+    this.tokenRefresherSingletonInstance = this
   }
 
   _clear () {
@@ -105,7 +94,6 @@ class TokenRefresher {
   **/
   updateToken (opts = {}) {
     if (!opts.token) {
-      this._clear()
       throw new Error('TokenRefresher: Error retrieving the new token')
     }
 
@@ -148,7 +136,7 @@ class TokenRefresher {
    * @param {Object} retryData Necessary data to fetch/retry request
    * @returns {Object|Promise}
   **/
-  onSessionExpired (req, resolve, reject, retryData) {
+  _onSessionExpired (req, resolve, reject, retryData) {
     this.attempts++
     if (this.attempts >= MAX_ATTEMPTS) {
       this._clear()
@@ -163,14 +151,33 @@ class TokenRefresher {
     return this.refreshTokenRequest()
       .then((refreshResponse) => {
         this.updateToken(refreshResponse)
-        this.retry(retryData)
-        .then(function (result) {
-          resolve(result)
-        })
+        return this.retry(retryData)
+      })
+      .then(function (result) {
+        resolve(result)
+        return true
       })
       .catch((error) => {
         this._clear()
         reject(error)
       })
+  }
+
+  /**
+   * Main function to be used as interceptor
+   * @param {Object} req Request handled
+   * @param {Function} resolve Promise resolve callback
+   * @param {Function} reject Promise reject callback
+   * @param {?Object} options
+  **/
+  interceptor (req, resolve, reject, options) {
+    let interceptedStatus = options.code || HTTP_SESSION_EXPIRED_CODE
+    // Session expired.
+    if (req.status === interceptedStatus) {
+      return this._onSessionExpired(req, resolve, reject, options)
+    }
+
+    this.resetAttempts()
+    return resolve(req)
   }
 }
