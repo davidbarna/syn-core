@@ -55,15 +55,17 @@ import {_} from 'underscore'
 export const ADD_CHANNEL = 'interceptors:add'
 export const RESPONSE_METHOD = 'response'
 
+let handlerSingletonInstance = null
+
 export class InterceptorHandler {
 
   constructor () {
-    if (this.instance) {
-      return this.instance
+    if (handlerSingletonInstance) {
+      return handlerSingletonInstance
     }
 
     this._interceptors = []
-    this.instance = this
+    handlerSingletonInstance = this
     this._listenOnAddEvent()
   }
 
@@ -82,6 +84,10 @@ export class InterceptorHandler {
   **/
   _error (functionName, msg, type = 'error') {
     console[type](`InterceptorHandler@${functionName}: ${msg}`)
+  }
+
+  destroy () {
+    handlerSingletonInstance = null
   }
 
   /**

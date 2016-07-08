@@ -23,7 +23,7 @@ describe 'interceptor.refresh.enable', ->
     enableTokenRefresher( mandatoryTokenRefresherOptions )
 
   afterEach ->
-    TokenRefresher.tokenRefresherSingletonInstance = null
+    TokenRefresher::destroy()
     @sandbox.restore()
 
   it 'should publish the interceptor add event', ->
@@ -85,7 +85,7 @@ describe 'interceptor.refresh.TokenRefresher', ->
         @instance = new TokenRefresher( {} )
 
       afterEach ->
-        @instance.tokenRefresherSingletonInstance = null
+        @instance.destroy()
 
       it 'should log an error', ->
         console.error.should.be.calledOnce
@@ -101,7 +101,7 @@ describe 'interceptor.refresh.TokenRefresher', ->
           @error = error
 
       afterEach ->
-        @instance.tokenRefresherSingletonInstance = null
+        @instance.destroy()
 
     describe 'when the token is passed as parameter', ->
       beforeEach ->
@@ -110,7 +110,7 @@ describe 'interceptor.refresh.TokenRefresher', ->
         @instance.updateToken( @fakeRefreshResponse )
 
       afterEach ->
-        @instance.tokenRefresherSingletonInstance = null
+        @instance.destroy()
 
       it 'should update session token', ->
         @session.token.should.have.been.calledOnce
@@ -134,7 +134,7 @@ describe 'interceptor.refresh.TokenRefresher', ->
         @retryResult = @instance.retry()
 
       afterEach ->
-        @instance.tokenRefresherSingletonInstance = null
+        @instance.destroy()
 
       it 'should do nothing', ->
         expect( @retryResult ).to.be.equal( undefined )
@@ -165,7 +165,7 @@ describe 'interceptor.refresh.TokenRefresher', ->
         @instance.interceptor( @fakeReq, @resolve, @reject, @fakeOpts )
 
       afterEach ->
-        @instance.tokenRefresherSingletonInstance = null
+        @instance.destroy()
 
       it 'should not intercept the request', ->
         @resolve.should.be.calledOnce
@@ -189,7 +189,7 @@ describe 'interceptor.refresh.TokenRefresher', ->
         @promise = @instance.interceptor( @fakeReq, @resolve, @reject, @fakeRetryData )
 
       afterEach ->
-        @instance.tokenRefresherSingletonInstance = null
+        @instance.destroy()
 
       it 'should intercept the request', ( done ) ->
         @promise.then =>
@@ -211,7 +211,7 @@ describe 'interceptor.refresh.TokenRefresher', ->
         @instance._onSessionExpired({}, @resolve, @reject)
 
       afterEach ->
-        @instance.tokenRefresherSingletonInstance = null
+        @instance.destroy()
 
       it 'should reject the interceptor', ->
         @reject.should.be.calledOnce
@@ -229,7 +229,7 @@ describe 'interceptor.refresh.TokenRefresher', ->
         @instance._onSessionExpired({}, @resolve, @reject)
 
       afterEach ->
-        @instance.tokenRefresherSingletonInstance = null
+        @instance.destroy()
 
       it 'should reject the interceptor', ->
         @reject.should.be.calledOnce
@@ -256,7 +256,7 @@ describe 'interceptor.refresh.TokenRefresher', ->
         @promise = @instance._onSessionExpired({}, @resolve, @reject, @fakeRetryData )
 
       afterEach ->
-        @instance.tokenRefresherSingletonInstance = null
+        @instance.destroy()
 
       it 'should call the retry function with the right data', ( done ) ->
         @promise.then =>
@@ -287,7 +287,7 @@ describe 'interceptor.refresh.TokenRefresher', ->
         @promise = @instance._onSessionExpired({}, @resolve, @reject, @fakeRetryData )
 
       afterEach ->
-        @instance.tokenRefresherSingletonInstance = null
+        @instance.destroy()
 
       it 'should reject the interceptor', ( done ) ->
         @promise.then =>

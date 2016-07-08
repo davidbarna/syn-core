@@ -49,6 +49,9 @@ describe 'interceptor.handler', ->
     beforeEach ->
       @instance = new InterceptorHandler()
 
+    afterEach ->
+      @instance.destroy()
+
     it 'should initialize the interceptors array', ->
       expect( @instance._interceptors.length ).to.be.equal( 0 )
 
@@ -67,6 +70,9 @@ describe 'interceptor.handler', ->
   describe '#add', ->
     beforeEach ->
       @instance = new InterceptorHandler()
+
+    afterEach ->
+      @instance.destroy()
 
     describe 'when wrong interceptor object is passed as parameter', ->
       beforeEach ->
@@ -110,6 +116,9 @@ describe 'interceptor.handler', ->
 
       @instance.remove( @resolvingResponseIntercetor )
 
+    afterEach ->
+      @instance.destroy()
+
     it 'should remove the right interceptor', ->
       @instance._interceptors.length.should.be.equal( 2 )
       @instance._interceptors[0].should.deep.equal( @rejectingResponseInterceptor )
@@ -126,7 +135,7 @@ describe 'interceptor.handler', ->
         @promise = @instance.process( 'request', @fakeData, @fakeOptions )
 
       afterEach ->
-        @instance = null
+        @instance.destroy()
 
       it 'should call the right interceptor', ( done ) ->
         @promise.then =>
@@ -158,7 +167,7 @@ describe 'interceptor.handler', ->
         @promise = @instance.process( 'response', @fakeData, @fakeOptions )
 
       afterEach ->
-        @instance = null
+        @instance.destroy()
 
       it 'should throw an error', ( done ) ->
         @promise.then ->

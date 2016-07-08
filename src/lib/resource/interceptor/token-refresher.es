@@ -10,6 +10,8 @@ import {
 const MAX_ATTEMPTS = 2
 const HTTP_SESSION_EXPIRED_CODE = 419
 
+let tokenRefresherSingletonInstance = null
+
 /**
  * Adds the necessary interceptor for 419 response codes.
  * Will try to refresh the token and retries the last request
@@ -43,8 +45,8 @@ export class TokenRefresher {
   **/
   constructor (opts) {
     this.resetAttempts()
-    if (this.tokenRefresherSingletonInstance) {
-      return this.tokenRefresherSingletonInstance
+    if (tokenRefresherSingletonInstance) {
+      return tokenRefresherSingletonInstance
     }
 
     if (!opts.refreshRequestFn) {
@@ -53,7 +55,7 @@ export class TokenRefresher {
 
     this.refreshTokenRequest = opts.refreshRequestFn
     this.retryRequest = opts.retryRequestFn
-    this.tokenRefresherSingletonInstance = this
+    tokenRefresherSingletonInstance = this
   }
 
   _clear () {
@@ -86,6 +88,13 @@ export class TokenRefresher {
   }
 
   /**
+   * Destroys the TokenRefresher singleton instance
+  **/
+  destroy () {
+    tokenRefresherSingletonInstance = null
+  }
+
+  /**
    * Saves the new token data into the current session
    * @param {Object} opts Options
    * @param {string} opts.token
@@ -97,7 +106,7 @@ export class TokenRefresher {
   updateToken (opts = {}, reject) {
     if (!opts.token) {
       this._clear()
-      reject( new Error('TokenRefresher: Error retrieving the new token') )
+      reject(new Error('TokenRefresher: Error retrieving the new token'))
       return
     }
 
