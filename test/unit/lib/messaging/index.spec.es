@@ -25,7 +25,7 @@ describe('lib/messaging', function () {
   describe('#setUIService', function () {
     describe('when given service does not implement interface', function () {
       it('should throw an error', function () {
-        (function () {messaging.setUIService({})}).should.throw
+        (function () { messaging.setUIService({}) }).should.throw
       })
     })
 
