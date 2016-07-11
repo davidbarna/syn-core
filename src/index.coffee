@@ -12,7 +12,11 @@ synCore =
       TokenRefresher: require( './lib/resource/interceptor/token-refresher' )
   angularify: require( './lib/angularify' )
   i18n: require( './lib/i18n' ).i18n
-
+  Messaging: require( './lib/messaging' ).default
+  messaging:
+    ui:
+      Interface: require( './lib/messaging/ui/interface' ).default
+      
 if !!window
   window.syn ?= {}
   window.syn.core ?= synCore
