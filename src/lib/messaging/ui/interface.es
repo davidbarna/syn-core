@@ -9,7 +9,7 @@ class MesssagingUiInterface {
    * @param  {Object} options.title Title of the message
    * @param  {Object} options.text Text of the message
    * @param  {Boolen} options.allowClosure = true Whether to block message closing
-   * @return {[type]}         [description]
+   * @return {Promise} Promise resolved on user response {Boolean}
    */
   confirm (options) {
     throw new Error('MesssagingUiInterface: undefined alert()  method')

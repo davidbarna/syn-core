@@ -1,6 +1,5 @@
 ###
  * Regular expressions to validate any path of the url
- * @type {[type]}
 ###
 REGEXP =
   PROTO: '(http[s]?)'
