@@ -55,19 +55,40 @@ import {_} from 'underscore'
 export const ADD_CHANNEL = 'interceptors:add'
 export const RESPONSE_METHOD = 'response'
 
+let handlerSingletonInstance = null
+
 export class InterceptorHandler {
 
   constructor () {
-    if (this.instance) {
-      return this.instance
+    if (handlerSingletonInstance) {
+      return handlerSingletonInstance
     }
 
     this._interceptors = []
-    this.instance = this
+    handlerSingletonInstance = this
     this._listenOnAddEvent()
   }
 
+  /**
+   * RESPONSE_METHOD getter
+   * @static
+   * @returns {string}
+  **/
   static get RESPONSE_METHOD () { return RESPONSE_METHOD }
+
+  /**
+   * @param {string} functionName Usually the function which is calling
+   * this error function
+   * @param {string} msg
+   * @param {?string} type window.console method to be executed
+  **/
+  _error (functionName, msg, type = 'error') {
+    console[type](`InterceptorHandler@${functionName}: ${msg}`)
+  }
+
+  destroy () {
+    handlerSingletonInstance = null
+  }
 
   /**
    * Calls all the interceptors that are listening to
@@ -112,25 +133,38 @@ export class InterceptorHandler {
 
   /**
    * Adds an interceptor.
-   * @param {object} interceptor
+   * @param {Object} interceptor
    * @returns
    */
   add (interceptor) {
-    if (typeof interceptor !== 'object' || interceptor === null) {
-      console.warn('Interceptor.add: Invalid interceptor.')
-      return false
+    if (typeof interceptor !== 'object') {
+      this._error('add', 'Invalid interceptor, an object was expected.')
+      return
     }
+
+    let keys = Object.keys(interceptor)
+    if (keys.length !== 1) {
+      this._error('add', 'Only one interceptor allowed at once')
+      return
+    }
+
+    let key = keys[0]
+    if (typeof interceptor[key] !== 'function') {
+      this._error('add', `Interceptor ${key} is not a function`)
+      return
+    }
+
     this._interceptors.push(interceptor)
   }
 
   /**
    * Removes an interceptor.
-   * @param {object} interceptor
+   * @param {Object} interceptor
    * @returns
    */
   remove (interceptor) {
     this._iterateInterceptors((current, position) => {
-      if (current === interceptor) {
+      if (_.isEqual(current, interceptor)) {
         this._interceptors.splice(position, 1)
       }
     })
@@ -138,7 +172,7 @@ export class InterceptorHandler {
 
   /**
    * Iterates all the interceptors.
-   * @param {function} callback
+   * @param {Function} callback
    * @returns
    */
   _iterateInterceptors (callback) {

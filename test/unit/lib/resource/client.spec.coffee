@@ -1,8 +1,8 @@
-describe 'syn-auth.resource.Client', ->
+describe 'syn-core.resource.Client', ->
 
-  auth = require( 'src/index.bundle' )
+  core = require( 'src/index.bundle' )
 
-  Resource = auth.resource.Client
+  Resource = core.resource.Client
   URL = 'https://test.domain.com:3333/auth'
 
   beforeEach ->
