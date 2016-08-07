@@ -19,7 +19,10 @@
 angularify = ( scope, ctrl ) ->
 
   if !ctrl.destroy
-    console.warn( 'angularify: controller provided wihout destroy function' )
+    console.warn( 'angularify: controller provided without destroy function' )
+
+  if !!ctrl.get
+    console.warn( 'angularify: get is a reserved word in controllers' )
 
   ###
    * Forces view render through angular
@@ -31,9 +34,19 @@ angularify = ( scope, ctrl ) ->
     scope.$digest() if !scope.$$phase && !scope.$root.$$phase
     return
 
+  ###
+   * Get the value of angular's scope
+   * @param  {string} key
+   * @return {*}
+  ###
+  ctrl.get = (key) ->
+    return scope[key]
+
   # On scope destroy, ctrl.destroy must be called if exists
   scope.$on( '$destroy', ->
     ctrl.destroy?()
   )
+
+  return ctrl
 
 module.exports = angularify
