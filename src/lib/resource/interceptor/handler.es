@@ -50,7 +50,7 @@
 
 import pubsub from '../../../lib/pubsub/channel-factory'
 import {Promise} from 'bluebird'
-import {_} from 'underscore'
+import {_} from 'lodash'
 
 export const ADD_CHANNEL = 'interceptors:add'
 export const RESPONSE_METHOD = 'response'

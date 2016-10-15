@@ -26,6 +26,7 @@
     "bluebird": "3.3.3"
   },
   "devDependencies": {
+    "gulp": "3.9.1",
     "syn-dev-tools": "~0"
   }
 }
