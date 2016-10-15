@@ -1,6 +1,6 @@
 {
   "name": "syn-core",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Base libs for syn modules: events, dom builders, helpers, translations...",
   "main": "dist/index.js",
   "files": [
@@ -26,6 +26,7 @@
     "bluebird": "3.3.3"
   },
   "devDependencies": {
+    "gulp": "3.9.1",
     "syn-dev-tools": "~0"
   }
 }
