@@ -16,10 +16,9 @@ synCore =
   messaging:
     ui:
       Interface: require( './lib/messaging/ui/interface' ).default
-      
-if !!window
-  window.syn ?= {}
-  window.syn.core ?= synCore
 
 if !!module
   module.exports = synCore
+else
+  window.syn ?= {}
+  window.syn.core ?= synCore
