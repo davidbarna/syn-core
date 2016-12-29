@@ -3,13 +3,12 @@ describe 'syn-core.pubsub.channel.factory', ->
   core = require( 'src/index')
   factory = core.pubsub.channel.factory
   Channel = core.pubsub.Channel
+  ROOT_CHANNELS_NS = '__synCore__PubSubChannelFactory__Channels'
 
   beforeEach ->
     @sandbox = sinon.sandbox.create()
 
   afterEach  ->
-    factory.channels = {}
-    factory.channelsCounters = {}
     @sandbox.restore()
     @instance = null
 
@@ -17,6 +16,12 @@ describe 'syn-core.pubsub.channel.factory', ->
 
     beforeEach ->
       @instance = factory.create 'fakeChannel', ['event1', 'event2']
+
+    afterEach ->
+      @instance.destroy()
+
+    it 'should add channels to global scope', ->
+      window[ROOT_CHANNELS_NS].should.equal(factory.channels)
 
     it 'should create instance with given events keys', ->
       @instance['event1'].publish.should.be.a 'function'
@@ -34,9 +39,10 @@ describe 'syn-core.pubsub.channel.factory', ->
       @instance['event2'].publish.should.be.a 'function'
       @instance['event3'].publish.should.be.a 'function'
 
+      instance.destroy()
 
     it 'should subscribe to destroy to control destruction', ->
-      destroy = @sandbox.stub factory, 'destroy'
+      destroy = @sandbox.spy factory, 'destroy'
       @instance.destroy()
       destroy.should.have.been.calledOnce
       destroy.should.have.been.calledWith 'fakeChannel'
@@ -49,6 +55,11 @@ describe 'syn-core.pubsub.channel.factory', ->
       @instance = factory.create 'fakeChannel', ['event3', 'event6']
 
       @unregisterAllEvents = @sandbox.stub @instance, 'unregisterAllEvents'
+
+    afterEach ->
+      @instance.destroy()
+      @instance.destroy()
+      @instance.destroy()
 
     it 'should not destroy channel if channels count is not 1',  ->
       @instance.destroy()

@@ -24,6 +24,15 @@ pubsub.click.subscribe( ->
 ```
 
 ###
+
+# Sometimes, working with different versions of syn-core,
+# or having some npm link inclusion, the file is loading more that once. Then, there are
+# several instances of this file in the same project, and some events don't work
+# We add the channels to host's global scope to avoid this problem
+ROOT_CHANNELS_NS = '__synCore__PubSubChannelFactory__Channels'
+root = window || global
+root[ROOT_CHANNELS_NS] ?= {}
+
 class PubSubChannelFactory
 
   PubSubChannel = require './channel'
@@ -32,7 +41,7 @@ class PubSubChannelFactory
   DEFAULT_NAME = 'root'
 
   # List of channels registered
-  @channels = {}
+  @channels = root[ROOT_CHANNELS_NS]
   # Counts each channel instances
   @channelsCounters = {}
 
