@@ -1,5 +1,7 @@
 synCore =
   Config: require( './lib/config' )
+  device:
+    network: require( './lib/device/network' )
   pubsub:
     Channel: require( './lib/pubsub/channel' )
     channel:
